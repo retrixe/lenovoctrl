@@ -40,8 +40,6 @@ func SaveConfig() {
 	}
 }
 
-// TODO: ReadSystemConfig if config does not exist? Cross-OS compat needs to be better.
-
 func LoadConfig() error {
 	file, err := os.ReadFile(GetConfigPath())
 	if err != nil {
@@ -56,13 +54,11 @@ func LoadConfig() error {
 }
 
 func ApplyConfig() error {
+	// This is disabled because this setting is stored in firmware.
 	// Lenovo Conservation Mode.
 	// if lenovo.IsConservationModeAvailable() {
 	// 	err := lenovo.SetConservationModeStatus(config.LenovoConservationModeEnabled)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// }
+	// 	if err != nil {return err}}
 
 	return nil
 }
