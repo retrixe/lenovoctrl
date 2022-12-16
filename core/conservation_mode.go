@@ -4,7 +4,6 @@ import (
 	"errors"
 	"os"
 	"path"
-	"strings"
 )
 
 // ErrConservationModeNotAvailable indicates that battery
@@ -52,22 +51,13 @@ func SetConservationModeStatus(mode bool) error {
 }
 
 func getConservationModeSysFs() (string, error) {
-	if !IsIdeapadLaptopKmodLoaded() {
-		return "", ErrIdeapadLaptopKmodNotLoaded
-	}
-
-	folders, err := os.ReadDir(ideapadAcpiSysFsDir)
+	ideapadAcpiVpcSysFsDir, err := GetIdeapadAcpiVpcSysFsDir()
 	if err != nil {
 		return "", err
 	}
-	for _, folder := range folders {
-		if strings.HasPrefix(folder.Name(), "VPC") {
-			conservationModeSysFsPath := path.Join(ideapadAcpiSysFsDir, folder.Name(), "conservation_mode")
-			if stat, err := os.Lstat(conservationModeSysFsPath); err != nil || stat.IsDir() {
-				continue
-			}
-			return conservationModeSysFsPath, nil
-		}
+	conservationModeSysFsPath := path.Join(ideapadAcpiVpcSysFsDir, "conservation_mode")
+	if stat, err := os.Lstat(conservationModeSysFsPath); err != nil || stat.IsDir() {
+		return "", ErrConservationModeNotAvailable
 	}
-	return "", ErrConservationModeNotAvailable
+	return conservationModeSysFsPath, nil
 }
