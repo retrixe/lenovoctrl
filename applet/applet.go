@@ -3,12 +3,13 @@ package applet
 import (
 	_ "embed"
 	"runtime"
+	"time"
 
 	"github.com/getlantern/systray"
 	"github.com/godbus/dbus/v5"
 )
 
-//go:embed icons/applet.png
+//go:embed icon.png
 var appletIcon []byte
 
 var conn *dbus.Conn
@@ -26,7 +27,6 @@ func RunApplet() {
 
 func onReady() {
 	// Setup systray.
-	// TODO: These functions need separation of concerns.
 	systray.SetIcon(appletIcon)
 	systray.SetTooltip("Control Lenovo laptop settings.")
 	if runtime.GOOS != "linux" {
@@ -37,19 +37,26 @@ func onReady() {
 	mBatteryConservationMode :=
 		systray.AddMenuItemCheckbox(
 			"Battery Conservation Mode",
-			"Enable battery conservation mode (caps battery to 60% charge)",
+			"Toggle battery conservation mode (caps battery to 60% charge).",
 			false,
 		)
-	conservationMode, err := GetConservationModeStatus()
-	if err != nil {
-		panic(err)
-	} else if conservationMode == -1 {
-		mBatteryConservationMode.Hide()
-	} else if conservationMode == 0 {
-		mBatteryConservationMode.Uncheck()
-	} else {
-		mBatteryConservationMode.Check()
-	}
+	// Fetch status every second.
+	go func() {
+		for {
+			conservationMode, err := GetConservationModeStatus()
+			if err != nil {
+				panic(err)
+			} else if conservationMode == -1 {
+				mBatteryConservationMode.Hide()
+			} else if conservationMode == 0 {
+				mBatteryConservationMode.Uncheck()
+			} else {
+				mBatteryConservationMode.Check()
+			}
+			<-time.After(1 * time.Second)
+		}
+	}()
+	// Add click handler.
 	go func() {
 		for {
 			<-mBatteryConservationMode.ClickedCh
@@ -70,7 +77,7 @@ func onReady() {
 	systray.AddSeparator()
 
 	// Add quit button.
-	mQuit := systray.AddMenuItem("Quit", "Quit the whole app")
+	mQuit := systray.AddMenuItem("Quit Lenovoctrl", "Close the Lenovoctrl applet.")
 	go func() {
 		<-mQuit.ClickedCh
 		systray.Quit()
