@@ -5,17 +5,28 @@ import (
 	"runtime"
 
 	"github.com/getlantern/systray"
+	"github.com/godbus/dbus/v5"
 )
 
 //go:embed icons/applet.png
 var appletIcon []byte
 
+var conn *dbus.Conn
+
 func RunApplet() {
+	var err error
+	conn, err = dbus.ConnectSystemBus()
+	if err != nil {
+		panic(err)
+	}
+	defer conn.Close()
+
 	systray.Run(onReady, onExit)
 }
 
 func onReady() {
 	// Setup systray.
+	// TODO: These functions need separation of concerns.
 	systray.SetIcon(appletIcon)
 	systray.SetTooltip("Control Lenovo laptop settings.")
 	if runtime.GOOS != "linux" {
@@ -29,17 +40,28 @@ func onReady() {
 			"Enable battery conservation mode (caps battery to 60% charge)",
 			false,
 		)
-	// TODO: mBatteryConservationMode.SetIcon(icon)
+	conservationMode, err := GetConservationModeStatus()
+	if err != nil {
+		panic(err)
+	} else if conservationMode == -1 {
+		mBatteryConservationMode.Hide()
+	} else if conservationMode == 0 {
+		mBatteryConservationMode.Uncheck()
+	} else {
+		mBatteryConservationMode.Check()
+	}
 	go func() {
 		for {
 			<-mBatteryConservationMode.ClickedCh
 			if mBatteryConservationMode.Checked() {
-				// TODO: Disable battery conservation mode.
-				println("disabling battery conservation mode")
+				if err := SetConservationMode(false); err != nil {
+					panic(err)
+				}
 				mBatteryConservationMode.Uncheck()
 			} else {
-				// TODO: Enable battery conservation mode.
-				println("enabling battery conservation mode")
+				if err := SetConservationMode(true); err != nil {
+					panic(err)
+				}
 				mBatteryConservationMode.Check()
 			}
 		}
@@ -49,7 +71,6 @@ func onReady() {
 
 	// Add quit button.
 	mQuit := systray.AddMenuItem("Quit", "Quit the whole app")
-	// TODO: mQuit.SetIcon(icon.Data)
 	go func() {
 		<-mQuit.ClickedCh
 		systray.Quit()
