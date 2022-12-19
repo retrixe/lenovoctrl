@@ -7,6 +7,11 @@ import (
 	"strings"
 )
 
+// Replaceable functions for testing.
+var osReadFile = os.ReadFile
+var osOpenFile = os.OpenFile
+var osReadDir = os.ReadDir
+
 const ideapadAcpiSysFsDir = "/sys/bus/platform/drivers/ideapad_acpi/"
 
 // ErrIdeapadLaptopKmodNotLoaded indicates that the ideapad_laptop kernel module is not loaded.
@@ -16,7 +21,7 @@ var ErrIdeapadLaptopKmodNotLoaded = errors.New("ideapad_laptop kernel module is 
 
 // IsIdeapadLaptopKmodLoaded checks whether or not the ideapad_laptop kernel module is loaded.
 func IsIdeapadLaptopKmodLoaded() bool {
-	modulesInfo, err := os.ReadFile("/proc/modules")
+	modulesInfo, err := osReadFile("/proc/modules")
 	if err != nil {
 		return false
 	}
@@ -35,7 +40,7 @@ func GetIdeapadAcpiVpcSysFsDir() (string, error) {
 		return "", ErrIdeapadLaptopKmodNotLoaded
 	}
 
-	folders, err := os.ReadDir(ideapadAcpiSysFsDir)
+	folders, err := osReadDir(ideapadAcpiSysFsDir)
 	if err != nil {
 		return "", err
 	}
@@ -44,13 +49,13 @@ func GetIdeapadAcpiVpcSysFsDir() (string, error) {
 			return path.Join(ideapadAcpiSysFsDir, folder.Name()), nil
 		}
 	}
-	return "", ErrConservationModeNotAvailable
+	return "", ErrIdeapadLaptopKmodNotLoaded
 }
 
 // writeToFile writes data to the named file.
 // It will NOT create the file or attempt to truncate it.
 func writeToFile(name string, data []byte) error {
-	f, err := os.OpenFile(name, os.O_WRONLY, os.ModePerm)
+	f, err := osOpenFile(name, os.O_WRONLY, os.ModePerm)
 	if err != nil {
 		return err
 	}

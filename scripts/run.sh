@@ -1,1 +1,1 @@
-exec go run -tags=legacy_appindicator -ldflags "-s -w" . $@
+exec go run -tags=legacy_appindicator -ldflags "-s -w" $@ .
