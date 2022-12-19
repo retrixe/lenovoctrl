@@ -22,7 +22,7 @@ func GetConfigPath() string {
 
 func SaveConfig() {
 	err := os.Mkdir(filepath.Dir(GetConfigPath()), 0755)
-	if err != nil {
+	if err != nil && !os.IsExist(err) {
 		log.Println("Failed to write persistent config file! "+
 			"Any changes made during this session may be lost on reboot!", err)
 	}
