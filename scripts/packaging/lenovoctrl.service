@@ -1,0 +1,10 @@
+[Unit]
+Description=Linux daemon and tools to control aspects of Lenovo IdeaPad/Legion devices.
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/lenovoctrl -d
+BusName=com.retrixe.LenovoCtrl.v0
+
+[Install]
+WantedBy=multi-user.target
