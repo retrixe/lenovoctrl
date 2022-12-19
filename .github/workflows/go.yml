@@ -37,3 +37,20 @@ jobs:
       with:
         name: lenovoctrl
         path: lenovoctrl
+
+  build-snap:
+    name: Build snap
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v2
+
+    - uses: snapcore/action-build@v1
+      name: Build snap
+      id: snapcraft
+
+    - uses: actions/upload-artifact@v2
+      name: Upload snap as build artifact
+      with:
+        name: snap
+        path: ${{ steps.snapcraft.outputs.snap }}

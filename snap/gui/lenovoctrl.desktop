@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=Lenovoctrl Applet
+GenericName=Lenovoctrl Applet
+Comment=Linux applet to control aspects of Lenovo IdeaPad/Legion devices.
+Exec=lenovoctrl
+Icon=${SNAP}/meta/gui/lenovoctrl.png
+Terminal=false
+Categories=Settings;Application;
