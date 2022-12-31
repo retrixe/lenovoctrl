@@ -1,0 +1,8 @@
+{
+  "name": "Lenovoctrl",
+  "description": "GNOME extension to control aspects of Lenovo IdeaPad/Legion devices. Requires lenovoctrl daemon to be installed.",
+  "uuid": "lenovoctrl@retrixe.me",
+  "shell-version": [
+    "43"
+  ]
+}
