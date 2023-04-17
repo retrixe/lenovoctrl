@@ -2,12 +2,12 @@ Name:           lenovoctrl
 Version:        1.0.0
 Release:        1%{?dist}
 Summary:        Linux daemon and tools to control aspects of Lenovo IdeaPad/Legion devices.
-BuildArch:      x86_64
+BuildArch:      x86_64 aarch64
 URL:            https://github.com/retrixe/lenovoctrl
 Group:          System
 Packager:       retrixe
 
-License:        GPL
+License:        GPL-3.0-or-later
 Source0:        %{expand:%%(pwd)}
 #Source0:        {name}-{version}.tar.gz
 
@@ -58,6 +58,8 @@ echo "enable lenovoctrl.service" > $RPM_BUILD_ROOT/%{_presetdir}/70-lenovoctrl.p
 # lenovoctrl d-bus policy
 mkdir -p $RPM_BUILD_ROOT/%{_sysconfdir}/dbus-1/system.d
 cp %{SOURCEURL0}/scripts/packaging/dbus-policy.conf $RPM_BUILD_ROOT/%{_sysconfdir}/dbus-1/system.d/com.retrixe.LenovoCtrl.v0.conf
+# lenovoctrl license
+cp %{SOURCEURL0}/LICENSE .
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -72,6 +74,7 @@ rm -rf $RPM_BUILD_ROOT
 %systemd_postun_with_restart lenovoctrl.service
 
 %files
+%license LICENSE
 %{_bindir}/%{name}
 %{_datadir}/applications/lenovoctrl.desktop
 # TODO: could be better
