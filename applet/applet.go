@@ -40,7 +40,6 @@ func onReady() {
 			"Toggle battery conservation mode (caps battery to 60% charge).",
 			false,
 		)
-	// Fetch status every second.
 	go func() {
 		for {
 			conservationMode, err := GetConservationModeStatus()
@@ -56,7 +55,6 @@ func onReady() {
 			<-time.After(1 * time.Second)
 		}
 	}()
-	// Add click handler.
 	go func() {
 		for {
 			<-mBatteryConservationMode.ClickedCh
@@ -75,6 +73,43 @@ func onReady() {
 	}()
 
 	systray.AddSeparator()
+
+	// Add autostart button.
+	mAutostart :=
+		systray.AddMenuItemCheckbox(
+			"Autostart on Login",
+			"Toggle the applet autostarting on login.",
+			false,
+		)
+	go func() {
+		for {
+			autostartEnabled, err := IsAutostartEnabled()
+			if err != nil {
+				panic(err)
+			} else if autostartEnabled {
+				mAutostart.Check()
+			} else {
+				mAutostart.Uncheck()
+			}
+			<-time.After(1 * time.Second)
+		}
+	}()
+	go func() {
+		for {
+			<-mAutostart.ClickedCh
+			if mAutostart.Checked() {
+				if err := SetAutostartEnabled(false); err != nil {
+					panic(err)
+				}
+				mAutostart.Uncheck()
+			} else {
+				if err := SetAutostartEnabled(true); err != nil {
+					panic(err)
+				}
+				mAutostart.Check()
+			}
+		}
+	}()
 
 	// Add quit button.
 	mQuit := systray.AddMenuItem("Quit Lenovoctrl", "Close the Lenovoctrl applet.")
