@@ -33,7 +33,6 @@ func onReady() {
 		systray.SetTitle("lenovoctrl")
 	}
 
-	// Add conservation mode button.
 	mBatteryConservationMode :=
 		systray.AddMenuItemCheckbox(
 			"Battery Conservation Mode",
@@ -68,6 +67,44 @@ func onReady() {
 					panic(err)
 				}
 				mBatteryConservationMode.Check()
+			}
+		}
+	}()
+
+	mKeyboardFnLock :=
+		systray.AddMenuItemCheckbox(
+			"Keyboard Fn Lock",
+			"Toggle keyboard Fn Lock.",
+			false,
+		)
+	go func() {
+		for {
+			keyboardFnLock, err := GetKeyboardFnLockStatus()
+			if err != nil {
+				panic(err)
+			} else if keyboardFnLock == -1 {
+				mKeyboardFnLock.Hide()
+			} else if keyboardFnLock == 0 {
+				mKeyboardFnLock.Uncheck()
+			} else {
+				mKeyboardFnLock.Check()
+			}
+			<-time.After(1 * time.Second)
+		}
+	}()
+	go func() {
+		for {
+			<-mKeyboardFnLock.ClickedCh
+			if mKeyboardFnLock.Checked() {
+				if err := SetKeyboardFnLock(false); err != nil {
+					panic(err)
+				}
+				mKeyboardFnLock.Uncheck()
+			} else {
+				if err := SetKeyboardFnLock(true); err != nil {
+					panic(err)
+				}
+				mKeyboardFnLock.Check()
 			}
 		}
 	}()

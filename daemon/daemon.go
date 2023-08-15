@@ -49,6 +49,12 @@ const intro = introspect.IntrospectDeclarationString + `
 		<method name="SetConservationMode">
 		  <arg direction="in" type="b"/>
 		</method>
+		<method name="GetKeyboardFnLockStatus">
+			<arg direction="out" type="n"/>
+		</method>
+		<method name="SetKeyboardFnLock">
+		  <arg direction="in" type="b"/>
+		</method>
 	</interface>` + introspect.IntrospectDataString + `</node>`
 
 func ListenToDBus(conn *dbus.Conn) {
@@ -85,6 +91,26 @@ func (f DBusAPI) GetConservationModeStatus() (int16, *dbus.Error) {
 
 func (f DBusAPI) SetConservationMode(status bool) *dbus.Error {
 	if err := core.SetConservationModeStatus(status); err != nil {
+		return dbus.MakeFailedError(err)
+	}
+	return nil
+}
+
+func (f DBusAPI) GetKeyboardFnLockStatus() (int16, *dbus.Error) {
+	status, err := core.IsKeyboardFnLockEnabled()
+	if err == core.ErrKeyboardFnLockNotAvailable {
+		return -1, nil
+	} else if err != nil {
+		return -1, dbus.MakeFailedError(err)
+	} else if status {
+		return 1, nil
+	} else {
+		return 0, nil
+	}
+}
+
+func (f DBusAPI) SetKeyboardFnLock(status bool) *dbus.Error {
+	if err := core.SetFnLockStatus(status); err != nil {
 		return dbus.MakeFailedError(err)
 	}
 	return nil
