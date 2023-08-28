@@ -78,7 +78,7 @@ type DBusAPI string
 
 func (f DBusAPI) GetConservationModeStatus() (int16, *dbus.Error) {
 	status, err := core.IsConservationModeEnabled()
-	if err == core.ErrConservationModeNotAvailable {
+	if err == core.ErrConservationModeNotAvailable || err == core.ErrIdeapadLaptopKmodNotLoaded {
 		return -1, nil
 	} else if err != nil {
 		return -1, dbus.MakeFailedError(err)
@@ -98,7 +98,7 @@ func (f DBusAPI) SetConservationMode(status bool) *dbus.Error {
 
 func (f DBusAPI) GetKeyboardFnLockStatus() (int16, *dbus.Error) {
 	status, err := core.IsKeyboardFnLockEnabled()
-	if err == core.ErrKeyboardFnLockNotAvailable {
+	if err == core.ErrKeyboardFnLockNotAvailable || err == core.ErrIdeapadLaptopKmodNotLoaded {
 		return -1, nil
 	} else if err != nil {
 		return -1, dbus.MakeFailedError(err)
