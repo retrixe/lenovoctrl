@@ -7,6 +7,7 @@ import (
 
 	"github.com/getlantern/systray"
 	"github.com/godbus/dbus/v5"
+	"github.com/ncruces/zenity"
 )
 
 //go:embed icon.png
@@ -18,6 +19,7 @@ func RunApplet() {
 	var err error
 	conn, err = dbus.ConnectSystemBus()
 	if err != nil {
+		zenity.Error("Failed to connect to system bus: " + err.Error())
 		panic(err)
 	}
 	defer conn.Close()
@@ -43,7 +45,7 @@ func onReady() {
 		for {
 			conservationMode, err := GetConservationModeStatus()
 			if err != nil {
-				panic(err)
+				zenity.Error("Failed to get conservation mode status: " + err.Error())
 			} else if conservationMode == -1 {
 				mBatteryConservationMode.Hide()
 			} else if conservationMode == 0 {
@@ -59,12 +61,12 @@ func onReady() {
 			<-mBatteryConservationMode.ClickedCh
 			if mBatteryConservationMode.Checked() {
 				if err := SetConservationMode(false); err != nil {
-					panic(err)
+					zenity.Error("Failed to set conservation mode status: " + err.Error())
 				}
 				mBatteryConservationMode.Uncheck()
 			} else {
 				if err := SetConservationMode(true); err != nil {
-					panic(err)
+					zenity.Error("Failed to set conservation mode status: " + err.Error())
 				}
 				mBatteryConservationMode.Check()
 			}
@@ -81,7 +83,7 @@ func onReady() {
 		for {
 			keyboardFnLock, err := GetKeyboardFnLockStatus()
 			if err != nil {
-				panic(err)
+				zenity.Error("Failed to get keyboard Fn Lock status: " + err.Error())
 			} else if keyboardFnLock == -1 {
 				mKeyboardFnLock.Hide()
 			} else if keyboardFnLock == 0 {
@@ -97,12 +99,12 @@ func onReady() {
 			<-mKeyboardFnLock.ClickedCh
 			if mKeyboardFnLock.Checked() {
 				if err := SetKeyboardFnLock(false); err != nil {
-					panic(err)
+					zenity.Error("Failed to set keyboard Fn Lock status: " + err.Error())
 				}
 				mKeyboardFnLock.Uncheck()
 			} else {
 				if err := SetKeyboardFnLock(true); err != nil {
-					panic(err)
+					zenity.Error("Failed to set keyboard Fn Lock status: " + err.Error())
 				}
 				mKeyboardFnLock.Check()
 			}
@@ -122,7 +124,7 @@ func onReady() {
 		for {
 			autostartEnabled, err := IsAutostartEnabled()
 			if err != nil {
-				panic(err)
+				zenity.Error("Failed to get autostart status: " + err.Error())
 			} else if autostartEnabled {
 				mAutostart.Check()
 			} else {
@@ -136,12 +138,12 @@ func onReady() {
 			<-mAutostart.ClickedCh
 			if mAutostart.Checked() {
 				if err := SetAutostartEnabled(false); err != nil {
-					panic(err)
+					zenity.Error("Failed to set autostart status: " + err.Error())
 				}
 				mAutostart.Uncheck()
 			} else {
 				if err := SetAutostartEnabled(true); err != nil {
-					panic(err)
+					zenity.Error("Failed to set autostart status: " + err.Error())
 				}
 				mAutostart.Check()
 			}
